@@ -3,12 +3,28 @@ R code to visualise spectra from the ORCA output file.
 
 Written by Anthony Nash PhD (inception: 21/07/200). 
 
-Please reference this page along with myself if you make use of these R functions. 
+This is very much a personal-use pursuit but if you make use of these R functions please reference this page along with myself. 
 
+## Introduction
 These R functions were just a little bit of fun to tie my experience of using R with an attempt at forever improving my understanding of theoretical biophysics and computational chemistry. 
 
-See the code for more information but in essense to make use of the functions:
+## Language dependencies
+The code was written using R 4.0.1 (on a Windows 10 64 bit).
 
+The following packages are required:
+  * ggplot2 (developed using v. 3.3.2)
+  * ggrepel (developed using v. 0.8.2)
+
+## A quick example
+The R functions will look for the single instance of "IR SPECTRUM" and "RAMAN SPECTRUM" in the ORCA output file. If these are not present the user is informed. 
+The code work flow is quite basic:
+1. Read in the raw Raman or IR data: `getRamanData()` or `getIRData()`.
+2. Build the ggplot2 visuals and process the raw data: `buildPlotSpectra()`.
+3. Visualise the spectra: `plotSpectra()`.
+
+Consider the example of compraing the spectra of two IR and two Raman calculations:
+
+```r
 #===============================================================================
 source("IR_spectra_code.R")
 
@@ -31,3 +47,4 @@ irSpectraObject <- buildPlotSpectra(irFileDataONEDF, irFileDataTWODF,
                                      minLabelY=100)
 plotSpectra(ramanSpectraObject)
 #===============================================================================
+```
