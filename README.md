@@ -48,3 +48,7 @@ irSpectraObject <- buildPlotSpectra(irFileDataONEDF, irFileDataTWODF,
 plotSpectra(ramanSpectraObject)
 #===============================================================================
 ```
+The peak value labels are assigned when a peak is greater than `minLabelY`. Labels can be turned off using `minLabelY=0`. Users can make unique adjustments to the ggplot2 object by retrieving the ggplot2 object found in the first element of the `irSpectraObject` data structure or by potting the raw spectrum data found in the second element.  
+
+Plotting the IR data will produce:
+![alt text](https://github.com/acnash/R_for_ORCA/blob/master/Two_IR.jpeg "2 IR spectra")
