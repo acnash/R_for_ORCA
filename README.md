@@ -8,6 +8,8 @@ This is very much a personal-use pursuit but if you make use of these R function
 ## Introduction
 These R functions were just a little bit of fun to tie my experience of using R with an attempt at forever improving my understanding of theoretical biophysics and computational chemistry. 
 
+A list of useful frequency scaling factors can be found here: https://cccbdb.nist.gov/vibscalejust.asp
+
 ## Language dependencies
 The code was written using R 4.0.1 (on a Windows 10 64 bit).
 
@@ -34,7 +36,7 @@ ramanFileDataTWODF <- getRamanData("M06_6-311G++(d,p).OUT")
 spectraNames <- c("M06_6-31G(d)","M06_6-311G++(d,p)")
 ramanSpectraObject <- buildPlotSpectra(ramanFileDataONEDF, ramanFileDataTWODF,
                                         spectraNames=spectraNames, mode="RAMAN", 
-                                        minLabelY=100)
+                                        minLabelY=100, scalingFactor=c(0.947,0.950))
 plotSpectra(ramanSpectraObject)
 
 #===============================================================================
@@ -44,7 +46,7 @@ irFileDataTWODF <- getIRData("M06_6-311G++(d,p).OUT")
 spectraNames <- c("M06_6-31G(d)","M06_6-311G++(d,p)")
 irSpectraObject <- buildPlotSpectra(irFileDataONEDF, irFileDataTWODF,
                                      spectraNames=spectraNames, mode="IR", 
-                                     minLabelY=100)
+                                     minLabelY=100, scalingFactor=c(1,1))
 plotSpectra(ramanSpectraObject)
 #===============================================================================
 ```
