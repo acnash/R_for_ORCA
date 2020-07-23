@@ -33,7 +33,7 @@ getIRData <- function(fileStr) {
   #this is the user facing function
   
   fileData <- loadORCAOutputFile(fileStr, "IR")
-  return(fileDate)
+  return(fileData)
 }
 
 
@@ -94,8 +94,10 @@ plotSpectra <- function(spectraObject) {
 #' @param spectraNames A character vector of names for the plot legend. This must be the same length as the
 #' number of individual spectra provided.
 #' @param mode Must be either "IR" or "RAMAN".
-#' @param minLabelY A basic Y > N indicator to direct the labelling of peaks. Default is 0. The peaks
+#' @param minLabelY A basic Y > N indicator to direct the labeling of peaks. Default is 0. The peaks
 #' are not labeled if the default value (0) is used. 
+#' @param scalingFactor a numeric vector, one element for each spectrum, typically of values between 0.8 and 1 (default). A list of scaling factors by functional
+#' and basis set can be found here: https://cccbdb.nist.gov/vibscalejust.asp The scaling factor adjusts the wave number (frequency).
 #'
 #' @return A named SpectraObject object. The first element is the ggplot2 object and
 #' the second element is the raw data as a data.frame of N obs and 4 variables: Mode, 
@@ -103,10 +105,15 @@ plotSpectra <- function(spectraObject) {
 #' @export
 #'
 #' @examples See getIRData() and getRamanData()
-buildPlotSpectra <- function(..., spectraNames=NULL, mode=NULL, minLabelY=0) {
+buildPlotSpectra <- function(..., spectraNames=NULL, mode=NULL, minLabelY=0, scalingFactor=1) {
   IR <- "IR"
   RAMAN <- "RAMAN"
   spectraList <- list(...)
+  
+  #check whether the number of scaling factos matches the number of spectra
+  if(length(spectraList) != length(scalingFactor)) {
+    stop("The number of spectra does not match the number of scaling factors.")
+  }
   
   #check where minLabelY makes sense
   if(minLabelY < 0) {
@@ -124,21 +131,35 @@ buildPlotSpectra <- function(..., spectraNames=NULL, mode=NULL, minLabelY=0) {
     print("Defining new spectrum names.")
     spectraNames <- sapply(1:length(spectraList), function(x) paste0("Spectra_",x))
   }
+  #-----all checks are complete--------------------------
   
+
+  #append a name to each spectrum and adjust the scaling factor  
   for(i in 1:length(spectraList)) {
-    spectraList[[i]] <- cbind(spectraList[[i]], Spectra=spectraNames[i])
+    spectraList[[i]]$Freq <- spectraList[[i]]$Freq * scalingFactor[i]
+    spectraList[[i]] <- cbind(spectraList[[i]], data.frame(Spectra=spectraNames[i]))
   }
   
   spectraDF <- do.call("rbind", spectraList)
   set.seed(42)
   
   if(mode == IR) {
-    gg <- ggplot2::ggplot(spectraDF, ggplot2::aes(x=Freq, y=Transmission, fill=Spectra, color=Spectra)) +
+    gg <- ggplot2::ggplot(data=spectraDF, ggplot2::aes(x=Freq, y=Transmission, fill=Spectra, color=Spectra)) +
       ggplot2::geom_bar(stat = "identity") + ggplot2::xlab("Freq (cm**-1)") + ggplot2::ylab("T**2") + 
-      ggplot2::scale_x_reverse() + ggplot2::scale_y_reverse() + ggplot2::theme_bw() + labs(fill="") + labs(color="") +
+      ggplot2::scale_x_reverse() + ggplot2::scale_y_reverse() + ggplot2::theme_bw() + ggplot2::labs(fill="") + ggplot2::labs(color="") +
       ggplot2::theme(legend.position="bottom", axis.text=ggplot2::element_text(size=12),axis.title=ggplot2::element_text(size=14)) 
+    
+    #gg <- ggplot2::ggplot(spectraDF, ggplot2::aes(x=Freq, y=Transmission, fill=Spectra, color=Spectra)) +
+    #  ggplot2::geom_bar(stat="identity", position = ggplot2::position_dodge()) + 
+    #  ggplot2::geom_smooth(ggplot2::aes(colour=Spectra), 
+    #                       se = FALSE,
+    #                       method="glm",
+    #                       formula=y~poly(x,2),
+    #                       show.legend=FALSE,lwd=0.7
+    #                       )
+    
     if(minLabelY > 0) {
-    gg <- gg + ggrepel::geom_label_repel(data=spectraDF[spectraDF$Transmission>=minLabelY,], ggplot2::aes(x=Freq, y=Transmission, label=Transmission,
+      gg <- gg + ggrepel::geom_label_repel(data=spectraDF[spectraDF$Transmission>=minLabelY,], ggplot2::aes(x=Freq, y=Transmission, label=Transmission,
                              fill = factor(Spectra)), color = 'black', size = 2.5)
     }  
     
@@ -146,7 +167,7 @@ buildPlotSpectra <- function(..., spectraNames=NULL, mode=NULL, minLabelY=0) {
     
     gg <- ggplot2::ggplot(spectraDF, ggplot2::aes(x=Freq, y=Activity, fill=Spectra, color=Spectra)) +
       ggplot2::geom_bar(stat = "identity") + ggplot2::xlab("Raman shift / (cm**-1)") + ggplot2::ylab("Intensity") + 
-      ggplot2::theme_bw() + labs(fill="") + labs(color="") +
+      ggplot2::theme_bw() + ggplot2::labs(fill="") + ggplot2::labs(color="") +
       ggplot2::theme(legend.position="bottom", axis.text=ggplot2::element_text(size=12),axis.title=ggplot2::element_text(size=14)) 
     if(minLabelY > 0) {
       gg <- gg + ggrepel::geom_label_repel(data=spectraDF[spectraDF$Activity>=minLabelY,], ggplot2::aes(x=Freq, y=Activity, label=Activity, 
