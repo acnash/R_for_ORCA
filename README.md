@@ -54,3 +54,8 @@ The peak value labels are assigned when a peak is greater than `minLabelY`. Labe
 
 Plotting the IR data will produce:
 ![alt text](https://github.com/acnash/R_for_ORCA/blob/master/Two_IR.jpeg "2 IR spectra")
+
+##To do list
+1. Gaussian smoothing over groups of peaks. I've yet to find a means of pulling this off in ggplot2. 
+2. Option to change colours on the graph. 
+3. A hand save function to a 300 DPI image (publication ready images).
